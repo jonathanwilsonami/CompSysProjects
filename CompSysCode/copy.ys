@@ -1,0 +1,62 @@
+#Jonathan Wilson jmw323
+.pos 0
+init:	irmovq Stack, %rsp 
+	irmovq Stack, %rbp 
+	call Main	   
+	halt		   # Terminate program
+
+	.align 8
+# Source block
+src:
+	.quad 0x00a
+	.quad 0x0b0
+	.quad 0xc00
+# Destination block
+dest:
+	.quad 0x111
+	.quad 0x222
+	.quad 0x333
+
+Main:	
+	pushq %rbp
+	rrmovq %rsp, %rbp
+	irmovq $3, %rax
+	pushq %rax
+	irmovq dest, %rax
+	pushq %rax
+	irmovq src, %rax
+	pushq %rax
+	call copy_block
+	rrmovq %rbp, %rsp
+	popq %rbp
+	ret
+
+	
+copy_block:
+	pushq %rbp
+	rrmovq %rsp, %rbp
+	rrmovq %rbp, %rsp
+	mrmovq 16(%rbp), %rcx	 
+	mrmovq 24(%rbp), %rdx    
+	mrmovq 32(%rbp), %rbx    
+	xorq %rax, %rax		 
+	andq %rbx, %rbx
+	jle end
+	
+loop:	
+	irmovq $8, %rdi		 
+	mrmovq (%rcx), %rsi	 
+	addq %rdi, %rcx		 
+	rmmovq %rsi, (%rdx)	 
+	addq %rdi, %rdx		 
+	xorq %rsi, %rax		 
+	irmovq $-1, %rdi
+	addq %rdi, %rbx		 
+	jg loop
+	
+end:	rrmovq %rbp, %rsp
+	popq %rbp
+	ret
+	
+	.pos 0x200
+Stack:

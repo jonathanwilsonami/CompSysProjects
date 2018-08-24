@@ -1,0 +1,56 @@
+# Jonathan Wilson jmw323 
+	.pos 0 
+	irmovq stack, %rsp  	# Set up stack pointer  
+	irmovq stack, %rbp  	# Set up stack pointer  
+	call main		# Execute main program
+	halt			# Terminate program 
+
+# Array of elements
+	.align 8 	
+ele1:
+	.quad 0x00a
+	.quad ele2
+ele2:
+	.quad 0x0b0
+	.quad ele3
+ele3:
+	.quad 0xc00
+	.quad 0
+
+
+main:
+	pushq %rbp
+	rrmovq %rsp, %rbp
+	irmovq ele1, %rax
+	pushq %rax
+	call rsum_list
+	rrmovq %rbp, %rsp
+	popq %rbp
+	ret
+
+rsum_list:
+	pushq %rbp
+	rrmovq %rsp, %rbp
+	rrmovq %rbp, %rsp
+	mrmovq 16(%rbp), %rcx 
+	andq %rcx, %rcx
+	je base
+	mrmovq (%rcx), %rdx  
+	pushq %rdx
+	mrmovq 8(%rcx), %rcx # get ls->next
+	pushq %rcx	     # push ls->next
+	call rsum_list
+	popq %rcx
+	popq %rdx
+	addq %rdx, %rax     
+	jmp exit
+base: 
+	xorq %rax, %rax
+	
+exit:	rrmovq %rbp, %rsp
+	popq %rbp
+	ret
+	ret
+
+	.pos 0x200		
+stack:	 
